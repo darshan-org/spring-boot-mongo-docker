@@ -1,0 +1,23 @@
+node{
+    stage("Git CheckOut"){
+        git url: 'https://github.com/darshan-org/spring-boot-mongo-docker.git',branch: 'master'
+    }
+    stage(" Maven Clean Package"){
+      def mavenHome =  tool name: "maven", type: "maven"
+      def mavenCMD = "${mavenHome}/bin/mvn"
+      sh "${mavenCMD} clean package"
+    } 
+    stage("Build Dokcer Image") {
+         sh "docker build -t darshanreddymr/spring-boot-mongo-docker ."
+    }
+    stage("Remove Local Image"){
+        sh "docker rmi -f darshanreddymr/spring-boot-mongo"
+    }
+    stage("Deploy to docker swarm cluster"){
+        sshagent(['Docker_Swarm_Manager_Dev']) {
+		    sh 'scp -o StrictHostKeyChecking=no  docker-compose.yml ubuntu@172.31.40.72:'
+		    //sh 'ssh -o StrictHostKeyChecking=no ubuntu@3.6.41.131 docker stack rm springboot'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.40.72 docker stack deploy --prune --compose-file docker-compose.yml springboot'
+        }
+    }
+}
