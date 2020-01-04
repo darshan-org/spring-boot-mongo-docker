@@ -4,7 +4,7 @@ services:
   springboot:
     image: darshanreddymr/spring-boot-mongo-docker
     restart: always
-    container_name: springboot1
+    container_name: springboot2
     ports:
       - 9091:8080
     working_dir: /opt/app
